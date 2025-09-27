@@ -1,15 +1,16 @@
 {
-  "name": "elysia",
-  "version": "1.0.50",
+  "name": "capn-web-playing",
+  "version": "1.0.0",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun run --watch src/index.ts"
   },
   "dependencies": {
-    "elysia": "latest"
+    "capnweb": "0.1.0",
+    "elysia": "1.4.8"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "bun-types": "1.2.22"
   },
   "module": "src/index.js"
 }
