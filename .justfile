@@ -1,9 +1,11 @@
-# Start dev
-dev: start_server
-
+# Start server
 start_server:
   cd server/ && bun dev
 
-# Connect to WS locally
+# Start client
+start_client:
+  cd client/ && bun run index.ts
+
+# Connect to WS (without RPC) locally
 connect_ws:
   bash -c 'source ./scripts/run.dev.sh && connect_ws'
