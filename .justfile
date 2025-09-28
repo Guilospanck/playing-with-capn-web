@@ -28,3 +28,7 @@ typecheck_client:
 
 # Run typecheck and lint for both Client and Server
 pre-pr: typecheck lint-fix
+
+# Log into DB via sqlite3 CLI
+db:
+  bash -c 'source ./scripts/run.dev.sh && log_into_db_with_sqlite3_cli'

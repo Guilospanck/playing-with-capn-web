@@ -3,7 +3,7 @@ set -e
 set -m
 
 connect_ws(){
-	npx wscat -c ws://localhost:3000/ws?id=1
+  npx wscat -c ws://localhost:3000/ws?id=1
 }
 
 lint_fix_server(){
@@ -36,4 +36,12 @@ typecheck(){
   typecheck_server
   cd ../
   typecheck_client
+}
+
+# Some commands:
+# .tables (show tables)
+# .quit (quit the CLI)
+log_into_db_with_sqlite3_cli() {
+  cd server/ 
+  sqlite3 -cmd ".headers on" -cmd ".mode column" -cmd ".nullvalue null" -cmd "select * from User;" mydb.sqlite
 }
