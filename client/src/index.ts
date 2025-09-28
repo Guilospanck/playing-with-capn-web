@@ -1,6 +1,6 @@
 import { RpcStub, newWebSocketRpcSession } from "capnweb";
 
-import type { PublicAPI, AuthenticatedAPI } from "../server/src";
+import type { PublicAPI, AuthenticatedAPI } from "../../server/src";
 
 console.info("Starting WS RPC connection...");
 using publicAPI: RpcStub<PublicAPI> = newWebSocketRpcSession<PublicAPI>(
