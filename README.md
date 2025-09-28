@@ -2,13 +2,26 @@
 
 Simple app implementing [Cap'n Web](https://github.com/cloudflare/capnweb/).
 
+## Installing
+
+Install [bun](https://bun.sh) and then `cd` into `client` and `server` and run `bun i` in each one of them to install dependencies.
+
 ## Running
 
-Install bun (necessary) and just (optional) and run:
+With [`just`](https://github.com/casey/just):
 
 ```shell
-# one terminal (you can also not use `just` and do `cd server/ && bun run dev`)
+# one terminal
 just start_server
-# another terminal (you can also not use `just` and do `cd client/ && bun run dev`)
+# another terminal
 just start_client
+```
+
+Without `just`:
+
+```shell
+# one terminal
+cd server/ && bun run dev
+# another terminal
+cd client/ && bun run dev
 ```
