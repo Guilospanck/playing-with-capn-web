@@ -1,6 +1,6 @@
 import { Elysia, t } from "elysia";
 import { RpcTarget, newWebSocketRpcSession } from "capnweb";
-import { WsAdapter } from "./ws-adapter";
+import { WsAdapter } from "@/adapters/ws-adapter";
 
 // RPC common shared interfaces/types
 export type UserInfo = {
