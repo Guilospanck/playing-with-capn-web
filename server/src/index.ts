@@ -1,6 +1,6 @@
 import { Elysia, t } from "elysia";
 import { RpcTarget, newWebSocketRpcSession } from "capnweb";
-import type { ServerWebSocket } from "bun";
+import { WsAdapter } from "./ws-adapter";
 
 // RPC common shared interfaces/types
 export type UserInfo = {
@@ -42,6 +42,8 @@ class PublicAPIImpl extends RpcTarget implements PublicAPI {
   }
 }
 
+const shims = new Map<String, WsAdapter>();
+
 const app = new Elysia()
   .get("/", () => "Hello Elysia")
   // Normal WS without RPC
@@ -64,54 +66,15 @@ const app = new Elysia()
         time: Date.now(),
       });
     },
-  });
-
-type Listener = (ev: any) => void;
-
-// Minimal “WebSocket-like” interface capnweb can work with
-class WsAdapter {
-  private listeners = new Map<string, Set<Listener>>();
-  constructor(private ws: ServerWebSocket<any>) {}
-
-  send(data: string | ArrayBuffer | Uint8Array) {
-    this.ws.send(data);
-  }
-  close(code?: number, reason?: string) {
-    this.ws.close(code, reason);
-  }
-
-  addEventListener(type: string, cb: Listener) {
-    if (!this.listeners.has(type)) this.listeners.set(type, new Set());
-    this.listeners.get(type)!.add(cb);
-  }
-  removeEventListener(type: string, cb: Listener) {
-    this.listeners.get(type)?.delete(cb);
-  }
-
-  // helper for Bun hooks to notify capnweb
-  dispatch(type: string, ev: any) {
-    this.listeners.get(type)?.forEach((cb) => cb(ev));
-  }
-}
-
-const shims = new WeakMap<ServerWebSocket<any>, WsAdapter>();
-
-const server = Bun.serve({
-  port: 3000,
-  fetch(req, srv) {
-    const url = new URL(req.url);
-
-    // Upgrade `/rpc` to WS; everything else goes to Elysia
-    if (url.pathname === "/rpc" && req.headers.get("upgrade") === "websocket") {
-      if (srv.upgrade(req)) return;
-      return new Response("WS upgrade failed", { status: 500 });
-    }
-    return app.fetch(req);
-  },
-  websocket: {
+  })
+  // WS with RPC
+  .ws("/rpc", {
+    // On new WS connection
     open(ws) {
+      console.info("New connection at /rpc: ", ws.id);
+
       const shim = new WsAdapter(ws);
-      shims.set(ws, shim);
+      shims.set(ws.id, shim);
 
       // let capnweb attach its listeners on the shim
       newWebSocketRpcSession(shim as unknown as WebSocket, new PublicAPIImpl());
@@ -120,14 +83,18 @@ const server = Bun.serve({
       shim.dispatch("open", {});
     },
     message(ws, message) {
+      console.info("Received message ", message);
       // capnweb expects { data } on message events
-      shims.get(ws)?.dispatch("message", { data: message });
+      shims.get(ws.id)?.dispatch("message", { data: JSON.stringify(message) });
     },
     close(ws, code, reason) {
-      shims.get(ws)?.dispatch("close", { code, reason });
-      shims.delete(ws);
+      console.info("Closing connection ", code, reason);
+      shims.get(ws.id)?.dispatch("close", { code, reason });
+      shims.delete(ws.id);
     },
-  },
-});
+  })
+  .listen(3000);
 
-console.log("Listening on", server.url);
+console.log(
+  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
+);
