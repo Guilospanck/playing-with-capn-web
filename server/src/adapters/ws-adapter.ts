@@ -8,7 +8,6 @@ export class WsAdapter {
   constructor(private ws: ElysiaWS) {}
 
   addEventListener(type: string, cb: Listener) {
-    console.info("Adding listener to type: ", type);
     if (!this.listeners.has(type)) this.listeners.set(type, new Set());
     this.listeners.get(type)!.add(cb);
   }
@@ -18,16 +17,13 @@ export class WsAdapter {
 
   // helper for Bun hooks to notify capnweb
   dispatch(type: string, ev: unknown) {
-    console.info("Dispatching type: ", type);
     this.listeners.get(type)?.forEach((cb) => cb(ev));
   }
   removeEventListener(type: string, cb: Listener) {
-    console.info("Removing listener to type: ", type);
     this.listeners.get(type)?.delete(cb);
   }
 
   send(data: string | ArrayBuffer | Uint8Array) {
-    console.info("Calling send from the WS adapter: ", data);
     this.ws.send(data);
   }
 }

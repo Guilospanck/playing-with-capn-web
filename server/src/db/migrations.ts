@@ -1,0 +1,13 @@
+export const MIGRATIONS = [
+  //  Users table
+  `
+  CREATE TABLE IF NOT EXISTS User (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    token TEXT NOT NULL UNIQUE,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+`,
+];

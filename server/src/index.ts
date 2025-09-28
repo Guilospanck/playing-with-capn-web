@@ -2,43 +2,74 @@ import { newWebSocketRpcSession, RpcTarget } from "capnweb";
 import { Elysia, t } from "elysia";
 
 import { WsAdapter } from "@/adapters/ws-adapter";
+import { db } from "@/db";
+import { randomUUIDv7 } from "bun";
+import { User, type UserInfo } from "./db/models";
 
 export interface AuthenticatedAPI {
   getMyInfo(): UserInfo;
 }
 
 export interface PublicAPI {
+  createNewUser(name: string, email: string): AuthenticatedAPI;
   authenticate(token: string): AuthenticatedAPI;
   getTodaysDate(): string;
 }
 
-// RPC common shared interfaces/types
-export type UserInfo = {
-  id: string;
-  name: string;
-};
-
 class AuthenticatedAPIImpl extends RpcTarget implements AuthenticatedAPI {
+  constructor(private user: User) {
+    super();
+  }
+
   getMyInfo(): UserInfo {
-    console.info("Calling `getMyInfo`");
-    return {
-      id: "adfjkafj",
-      name: "Larry",
-    };
+    return this.user.toJSON();
   }
 }
 
 class PublicAPIImpl extends RpcTarget implements PublicAPI {
-  authenticate(token: string): AuthenticatedAPI {
-    console.info("Calling `authenticate` with ", token);
-    if (token === "Tolkien") {
-      return new AuthenticatedAPIImpl();
+  createNewUser(name: string, email: string): AuthenticatedAPI {
+    // Check if user exists
+    const user = db
+      .query(`SELECT * FROM User WHERE email = $email;`)
+      .as(User)
+      .get({ email });
+
+    if (user !== null) {
+      return new AuthenticatedAPIImpl(user);
     }
 
-    throw new Error();
+    // User does not exist. Create it
+    const createdUser = db
+      .query(
+        `
+          INSERT into User (id, name, email, token)
+          VALUES ($id, $name, $email, $token)
+          RETURNING *
+        `,
+      )
+      .as(User)
+      .get({
+        id: randomUUIDv7(),
+        name,
+        email,
+        token: randomUUIDv7(),
+      });
+
+    return new AuthenticatedAPIImpl(createdUser!); // Returned user can't be null. We just created it
+  }
+  authenticate(token: string): AuthenticatedAPI {
+    const user = db
+      .query(`SELECT * FROM User WHERE token = $token;`)
+      .as(User)
+      .get({ token });
+
+    if (user === null) {
+      throw new Error("404 NOT FOUND");
+    }
+
+    return new AuthenticatedAPIImpl(user);
   }
   getTodaysDate(): string {
-    console.info("Calling `getTodaysDate`");
     return new Date().toISOString();
   }
 }
@@ -76,7 +107,6 @@ const app = new Elysia()
       shims.delete(ws.id);
     },
     message(ws, message) {
-      console.info("Received message ", message);
       // capnweb expects { data } on message events
       shims.get(ws.id)?.dispatch("message", { data: JSON.stringify(message) });
     },
@@ -94,8 +124,11 @@ const app = new Elysia()
       shim.dispatch("open", {});
     },
   })
+  .onStop(() => {
+    console.log("Server shutting down...closing DB connections");
+    db.close();
+  })
   .listen(3000);
-
 console.info(
   `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
 );

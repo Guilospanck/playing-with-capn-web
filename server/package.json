@@ -10,6 +10,7 @@
     "lint:fix": "eslint ./src --fix"
   },
   "dependencies": {
+    "@types/bun": "1.2.23",
     "capnweb": "0.1.0",
     "elysia": "1.4.8"
   },

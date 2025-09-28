@@ -11,9 +11,11 @@ console.info("Calling getTodaysDate...");
 const todaysDate = await publicAPI.getTodaysDate();
 console.info("Got todaysDate:", todaysDate);
 
-console.info("Calling authenticate...");
-using authenticatedAPI: RpcStub<AuthenticatedAPI> =
-  publicAPI.authenticate("Tolkien");
+console.info("Authenticating...");
+using authenticatedAPI: RpcStub<AuthenticatedAPI> = publicAPI.createNewUser(
+  "Guilherme",
+  "guilherme@email.com",
+);
 
 console.info("Calling getMyInfo...");
 const myInfo = await authenticatedAPI.getMyInfo();
