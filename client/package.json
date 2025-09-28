@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "bun run --watch src/index.ts",
+    "build": "bun build src/index.ts --compile --minify --outfile client",
     "typecheck": "tsc --noEmit",
     "lint": "eslint ./src --max-warnings=0",
     "lint:fix": "eslint ./src --fix"
@@ -27,7 +28,7 @@
     "eslint-plugin-sort-keys-fix": "1.1.2",
     "eslint-plugin-typescript-sort-keys": "3.3.0",
     "eslint-plugin-unused-imports": "4.1.4",
-    "typescript-eslint": "8.16.0"
+    "typescript-eslint": "8.44.1"
   },
   "module": "src/index.js"
 }

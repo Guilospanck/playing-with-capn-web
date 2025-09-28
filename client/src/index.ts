@@ -1,20 +1,20 @@
-import { RpcStub, newWebSocketRpcSession } from "capnweb";
+import type { AuthenticatedAPI, PublicAPI } from "@api/index";
 
-import type { PublicAPI, AuthenticatedAPI } from "../../server/src";
+import { newWebSocketRpcSession, RpcStub } from "capnweb";
 
 console.info("Starting WS RPC connection...");
 using publicAPI: RpcStub<PublicAPI> = newWebSocketRpcSession<PublicAPI>(
   "ws://localhost:3000/rpc",
 );
 
-console.log("Calling getTodaysDate...");
-let todaysDate = await publicAPI.getTodaysDate();
-console.log("Got todaysDate:", todaysDate);
+console.info("Calling getTodaysDate...");
+const todaysDate = await publicAPI.getTodaysDate();
+console.info("Got todaysDate:", todaysDate);
 
-console.log("Calling authenticate...");
+console.info("Calling authenticate...");
 using authenticatedAPI: RpcStub<AuthenticatedAPI> =
   publicAPI.authenticate("Tolkien");
 
-console.log("Calling getMyInfo...");
-let myInfo = await authenticatedAPI.getMyInfo();
-console.log("Got myInfo:", myInfo);
+console.info("Calling getMyInfo...");
+const myInfo = await authenticatedAPI.getMyInfo();
+console.info("Got myInfo:", myInfo);

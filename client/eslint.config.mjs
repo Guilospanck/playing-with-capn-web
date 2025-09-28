@@ -124,7 +124,7 @@ export default tseslint.config(
   {
     rules: {
       "@typescript-eslint/no-empty-object-type": "off",
-      "no-console": "warn",
+      "no-console": ["error", { allow: ["warn", "error", "info"] }],
       "no-empty-pattern": "off",
     },
   },

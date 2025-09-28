@@ -27,13 +27,13 @@ typecheck_client(){
 }
 
 lint_fix(){
-  lint_fix_client
-  cd ../
   lint_fix_server
+  cd ../
+  lint_fix_client
 }
 
 typecheck(){
-  typecheck_client
-  cd ../
   typecheck_server
+  cd ../
+  typecheck_client
 }
