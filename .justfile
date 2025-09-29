@@ -4,7 +4,7 @@ start_server:
 
 # Start client (connects to WS and calls RPC)
 start_client:
-  cd client/ && bun dev
+  cd client/ && bun run build && npx http-server -p 3000 .
 
 # Connect to WS (without RPC) locally
 connect_ws:
@@ -32,7 +32,3 @@ pre-pr: typecheck lint-fix
 # Log into DB via sqlite3 CLI
 db:
   bash -c 'source ./scripts/run.dev.sh && log_into_db_with_sqlite3_cli'
-
-# Server static content using http-server
-web:
-  cd client/ && bun run build && npx http-server -p 3000 .

@@ -3,7 +3,6 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "bun run --watch src/index.ts",
     "build": "bun build src/index.ts --minify --outdir dist",
     "typecheck": "tsc --noEmit",
     "lint": "eslint ./src --max-warnings=0",

@@ -23,5 +23,8 @@ Without `just`:
 # one terminal
 cd server/ && bun run dev
 # another terminal
-cd client/ && bun run dev
+cd client/ && bun run build && npx http-server -p 3000 . 
 ```
+
+After doing that, the server will be available at the port 4444 and the client at the 3000.
+Go to `http://localhost:3000` and test it.
