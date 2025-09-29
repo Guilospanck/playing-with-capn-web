@@ -7,16 +7,28 @@ using publicAPI: RpcStub<PublicAPI> = newWebSocketRpcSession<PublicAPI>(
   "ws://localhost:3000/rpc",
 );
 
-console.info("Calling getTodaysDate...");
-const todaysDate = await publicAPI.getTodaysDate();
-console.info("Got todaysDate:", todaysDate);
+const todaysDatePromise = publicAPI.getTodaysDate();
 
-console.info("Authenticating...");
 using authenticatedAPI: RpcStub<AuthenticatedAPI> = publicAPI.createNewUser(
   "Guilherme",
   "guilherme@email.com",
 );
+authenticatedAPI.onRpcBroken((_error: any) => {
+  // console.error("Authentication unsuccessful: ", error);
+});
 
-console.info("Calling getMyInfo...");
-const myInfo = await authenticatedAPI.getMyInfo();
-console.info("Got myInfo:", myInfo);
+const myInfoPromise = authenticatedAPI.getMyInfo((potato: unknown) => {
+  console.info("Bidirectional: ", potato);
+});
+
+const [todaysDate, myInfo] = await Promise.all([
+  todaysDatePromise,
+  myInfoPromise,
+]);
+
+console.info({
+  todaysDate,
+  myInfo,
+});
+
+myInfo[Symbol.dispose]();

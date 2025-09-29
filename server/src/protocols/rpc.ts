@@ -5,7 +5,7 @@ import { db } from "@/db";
 import { User, type UserInfo } from "@/db/models";
 
 export interface AuthenticatedAPI {
-  getMyInfo(): UserInfo;
+  getMyInfo(cb: (params: unknown) => void): UserInfo;
 }
 
 export interface PublicAPI {
@@ -19,7 +19,8 @@ class AuthenticatedAPIImpl extends RpcTarget implements AuthenticatedAPI {
     super();
   }
 
-  getMyInfo(): UserInfo {
+  getMyInfo(cb: (params: unknown) => void): UserInfo {
+    cb("Hello from getMyInfo");
     return this.user.toJSON();
   }
 }

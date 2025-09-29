@@ -3,8 +3,7 @@ import { Elysia, t } from "elysia";
 
 import { WsAdapter } from "@/adapters/ws-adapter";
 import { db } from "@/db";
-
-import { PublicAPIImpl } from "./protocols/rpc";
+import { PublicAPIImpl } from "@/protocols/rpc";
 
 const shims = new Map<string, WsAdapter>();
 
