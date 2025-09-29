@@ -1,4 +1,4 @@
-import type { AuthenticatedAPI, PublicAPI } from "@api/index";
+import type { AuthenticatedAPI, PublicAPI } from "@api/protocols/rpc";
 
 import { newWebSocketRpcSession, RpcStub } from "capnweb";
 

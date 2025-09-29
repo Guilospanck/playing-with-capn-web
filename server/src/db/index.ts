@@ -1,4 +1,5 @@
 import { Database } from "bun:sqlite";
+
 import { MIGRATIONS } from "./migrations";
 
 export const db = new Database("mydb.sqlite", {

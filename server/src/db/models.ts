@@ -1,9 +1,9 @@
 export type UserInfo = {
+  createdAt: string;
+  email: string;
   id: string;
   name: string;
-  email: string;
   token: string;
-  createdAt: string;
   updatedAt: string;
 };
 
@@ -19,11 +19,11 @@ export class User {
 
   toJSON(): UserInfo {
     return {
+      createdAt: this.createdAt,
+      email: this.email,
       id: this.id,
       name: this.name,
-      email: this.email,
       token: this.token,
-      createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };
   }
