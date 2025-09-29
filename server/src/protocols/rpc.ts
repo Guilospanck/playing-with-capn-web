@@ -4,6 +4,9 @@ import { RpcTarget } from "capnweb";
 import { db } from "@/db";
 import { User, type UserInfo } from "@/db/models";
 
+// Re-export UserInfo
+export type { UserInfo };
+
 export interface AuthenticatedAPI {
   getMyInfo(cb: (params: unknown) => void): UserInfo;
 }

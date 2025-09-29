@@ -59,7 +59,7 @@ const app = new Elysia()
     console.info("Server shutting down...closing DB connections");
     db.close();
   })
-  .listen(3000);
+  .listen(4444);
 
 console.info(
   `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
