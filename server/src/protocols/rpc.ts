@@ -4,7 +4,8 @@ import { RpcTarget } from "capnweb";
 import { db } from "@/db";
 import { User, type UserInfo } from "@/db/models";
 
-// Re-export UserInfo
+// Re-export UserInfo so we can use it correctly
+// and from just one place in the client.
 export type { UserInfo };
 
 export interface AuthenticatedAPI {
@@ -13,7 +14,7 @@ export interface AuthenticatedAPI {
 
 export interface PublicAPI {
   authenticate(token: string): AuthenticatedAPI;
-  createNewUser(name: string, email: string): AuthenticatedAPI;
+  getOrCreateUser(name: string, email: string): UserInfo;
   getTodaysDate(): string;
 }
 
@@ -36,12 +37,12 @@ export class PublicAPIImpl extends RpcTarget implements PublicAPI {
       .get({ token });
 
     if (user === null) {
-      throw new Error("404 NOT FOUND");
+      throw new Error("User not found with this token.");
     }
 
     return new AuthenticatedAPIImpl(user);
   }
-  createNewUser(name: string, email: string): AuthenticatedAPI {
+  getOrCreateUser(name: string, email: string): UserInfo {
     // Check if user exists
     const user = db
       .query(`SELECT * FROM User WHERE email = $email;`)
@@ -49,7 +50,7 @@ export class PublicAPIImpl extends RpcTarget implements PublicAPI {
       .get({ email });
 
     if (user !== null) {
-      return new AuthenticatedAPIImpl(user);
+      return user.toJSON();
     }
 
     // User does not exist. Create it
@@ -69,7 +70,7 @@ export class PublicAPIImpl extends RpcTarget implements PublicAPI {
         token: randomUUIDv7(),
       });
 
-    return new AuthenticatedAPIImpl(createdUser!); // Returned user can't be null. We just created it
+    return createdUser!.toJSON(); // Returned user can't be null. We just created it
   }
   getTodaysDate(): string {
     return new Date().toISOString();

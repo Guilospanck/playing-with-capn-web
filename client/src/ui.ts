@@ -1,8 +1,10 @@
 import {
   authenticate,
+  authenticateAndGetMyInfo,
   closeConnection,
   connectWS,
   getMyInfo,
+  getOrCreateUser,
   getTodaysDate,
 } from "@/rpc";
 
@@ -12,7 +14,7 @@ const TOAST_TIMEOUT = 3000;
 const content = document.getElementById("content")!;
 const status = document.getElementById("status")!;
 const buttons = document.getElementById("buttons")!;
-const errors = document.getElementById("errors")!;
+const notifications = document.getElementById("notifications")!;
 const serverMessages = document.getElementById("serverMessages")!;
 
 const buildButtons = () => {
@@ -48,6 +50,7 @@ const buildButtons = () => {
         this.disabled = true;
         connectionButton.disabled = false;
         authenticateButton.disabled = false;
+        getOrCreateUserButton.disabled = false;
         _updateStatus({
           title: "Disconnected.",
           color: "red",
@@ -74,7 +77,29 @@ const buildButtons = () => {
             borderColor: "green",
           });
         } catch (err) {
-          _showError(err as unknown as string);
+          _showNotification({ title: err as unknown as string });
+        }
+      },
+    },
+  });
+
+  // Get or create user button
+  const getOrCreateUserButton = _buildButton({
+    title: "Create user",
+    id: "createUser",
+    eventListener: {
+      type: "click",
+      listener: async function (this: HTMLButtonElement) {
+        try {
+          await getOrCreateUser();
+          this.disabled = true;
+          _showNotification({
+            title: "User created!",
+            color: "blue",
+            borderColor: "blue",
+          });
+        } catch (err) {
+          _showNotification({ title: err as unknown as string });
         }
       },
     },
@@ -91,7 +116,7 @@ const buildButtons = () => {
           const date = await getTodaysDate();
           content.innerText = date;
         } catch (err) {
-          _showError(err as unknown as string);
+          _showNotification({ title: err as unknown as string });
         }
       },
     },
@@ -112,10 +137,44 @@ const buildButtons = () => {
         };
 
         try {
+          /*
+           * Bidirectional calling.
+           *
+           * From the docs:
+           *
+           * 'Supports passing functions by reference: If you pass a function over RPC, the recipient receives a "stub".
+           * When they call the stub, they actually make an RPC back to you, invoking the function where it was created.
+           * This is how bidirectional calling happens: the client passes a callback to the server,
+           * and then the server can call it later.'
+           *
+           * */
           const myInfo = await getMyInfo(callback);
           content.innerText = JSON.stringify(myInfo);
         } catch (err) {
-          _showError(err as unknown as string);
+          _showNotification({ title: err as unknown as string });
+        }
+      },
+    },
+  });
+
+  _buildButton({
+    title: "Authenticate & get my info",
+    id: "authenticateAndGetMyInfo",
+    eventListener: {
+      type: "click",
+      listener: async function (this: HTMLButtonElement) {
+        const callback = (serverMsg: unknown) => {
+          const li = document.createElement("li");
+          li.innerText = `PromisePipelining: ${JSON.stringify(serverMsg)}`;
+          serverMessages.firstElementChild?.appendChild(li);
+          serverMessages.style.opacity = "100%";
+        };
+
+        try {
+          const myInfo = await authenticateAndGetMyInfo(callback);
+          content.innerText = JSON.stringify(myInfo);
+        } catch (err) {
+          _showNotification({ title: err as unknown as string });
         }
       },
     },
@@ -164,13 +223,17 @@ const _updateStatus = ({
   color?: string;
   borderColor?: string;
 }) => {
-  status.innerText = title ?? status.innerHTML;
-  status.style.color = color ?? status.style.color;
-  status.style.borderColor = borderColor ?? status.style.borderColor;
+  status.innerText = title;
+  if (color !== undefined) {
+    status.style.color = color;
+  }
+  if (borderColor !== undefined) {
+    status.style.borderColor = borderColor;
+  }
 };
 
 const _setInitialConditions = () => {
-  _hideError();
+  _hideNotification();
   _updateStatus({
     title: "Disconnected.",
     color: "red",
@@ -184,17 +247,32 @@ const _setInitialConditions = () => {
   }
 };
 
-const _hideError = () => {
-  errors.style.opacity = "0%";
-  errors.innerText = "";
+const _hideNotification = () => {
+  notifications.style.opacity = "0%";
+  notifications.innerText = "";
 };
 
-const _showError = (err: string) => {
-  errors.innerText = err;
-  errors.style.opacity = "100%";
+const _showNotification = ({
+  title,
+  color = "red",
+  borderColor = "red",
+}: {
+  title: string;
+  color?: string;
+  borderColor?: string;
+}) => {
+  notifications.innerText = title;
+  notifications.style.opacity = "100%";
+
+  if (color !== undefined) {
+    notifications.style.color = color;
+  }
+  if (borderColor !== undefined) {
+    notifications.style.borderColor = borderColor;
+  }
 
   setTimeout(() => {
-    _hideError();
+    _hideNotification();
   }, TOAST_TIMEOUT);
 };
 

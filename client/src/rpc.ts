@@ -2,6 +2,8 @@ import type { AuthenticatedAPI, PublicAPI, UserInfo } from "@api/protocols/rpc";
 
 import { newWebSocketRpcSession, RpcStub } from "capnweb";
 
+const NO_CONNECTION = "No connection to WS";
+
 let publicAPI: RpcStub<PublicAPI> | undefined = undefined;
 let authenticatedAPI: RpcStub<AuthenticatedAPI> | undefined = undefined;
 
@@ -10,30 +12,67 @@ const connectWS = async () => {
 };
 
 const getTodaysDate = async (): Promise<string> => {
-  if (!publicAPI) throw new Error("No connection to WS.");
+  if (!publicAPI) throw new Error(NO_CONNECTION);
 
   return await publicAPI.getTodaysDate();
 };
 
 const authenticate = async (): Promise<void> => {
-  if (!publicAPI) throw new Error("No connection to WS.");
+  if (!publicAPI) throw new Error(NO_CONNECTION);
 
-  authenticatedAPI = publicAPI?.createNewUser(
-    "Guilherme",
-    "guilherme@email.com",
-  );
+  const token = localStorage.getItem("token") ?? "";
+
+  // TODO: check why this is happening
+  // @ts-ignore
+  authenticatedAPI = await publicAPI.authenticate(token);
+
   authenticatedAPI?.onRpcBroken((error: any) => {
     console.error("Authentication unsuccessful: ", error);
   });
 };
 
+const getOrCreateUser = async (): Promise<UserInfo> => {
+  if (!publicAPI) throw new Error(NO_CONNECTION);
+
+  const user: RpcStub<UserInfo> = await publicAPI.getOrCreateUser(
+    "Guilherme",
+    "guilherme@email.com",
+  );
+  localStorage.setItem("token", user.token);
+
+  return user;
+};
+
 const getMyInfo = async (
   cb: (serverMsg: unknown) => void,
 ): Promise<UserInfo> => {
-  if (!publicAPI) throw new Error("No connection to WS.");
-  if (!authenticatedAPI) throw new Error("You're not authenticated!");
+  if (!publicAPI) throw new Error(NO_CONNECTION);
+  if (!authenticatedAPI)
+    throw new Error(
+      `You're not authenticated. Please first create a user, if you haven't, and then click "Authenticate".`,
+    );
 
   using myInfo = await authenticatedAPI?.getMyInfo(cb);
+
+  return myInfo;
+};
+
+// Example of the "promise pipelining":
+// we can `authenticate` and call the `getMyInfo`
+// in just one call to the server.
+const authenticateAndGetMyInfo = async (
+  cb: (serverMsg: unknown) => void,
+): Promise<UserInfo> => {
+  if (!publicAPI) throw new Error(NO_CONNECTION);
+
+  const token = localStorage.getItem("token") ?? "";
+
+  // Do not await
+  using auth: RpcStub<AuthenticatedAPI> = publicAPI.authenticate(token);
+
+  // Only here to actually get the info, but still we can use the methods (`getMyInfo`)
+  // from a non-awaited promise (`auth`)
+  using myInfo = await auth.getMyInfo(cb);
 
   return myInfo;
 };
@@ -49,4 +88,12 @@ const closeConnection = () => {
   publicAPI = undefined;
 };
 
-export { connectWS, authenticate, getMyInfo, getTodaysDate, closeConnection };
+export {
+  connectWS,
+  authenticate,
+  getMyInfo,
+  getTodaysDate,
+  closeConnection,
+  authenticateAndGetMyInfo,
+  getOrCreateUser,
+};

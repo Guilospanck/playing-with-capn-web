@@ -17,7 +17,7 @@ export class User {
     public updatedAt: string,
   ) {}
 
-  toJSON(): UserInfo {
+  public toJSON(): UserInfo {
     return {
       createdAt: this.createdAt,
       email: this.email,
