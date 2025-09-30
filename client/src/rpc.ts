@@ -23,10 +23,10 @@ const authenticate = async (): Promise<void> => {
   const token = localStorage.getItem("token") ?? "";
 
   // TODO: check why this is happening
-  // @ts-ignore
+  // @ts-expect-error Not sure why TS is saying: "Type instantiation is excessively deep and possibly infinite."
   authenticatedAPI = await publicAPI.authenticate(token);
 
-  authenticatedAPI?.onRpcBroken((error: any) => {
+  authenticatedAPI?.onRpcBroken((error: unknown) => {
     console.error("Authentication unsuccessful: ", error);
   });
 };
@@ -96,11 +96,11 @@ const closeConnection = () => {
 };
 
 export {
-  connectWS,
   authenticate,
-  getMyInfo,
-  getTodaysDate,
-  closeConnection,
   authenticateAndGetMyInfo,
+  closeConnection,
+  connectWS,
+  getMyInfo,
   getOrCreateUser,
+  getTodaysDate,
 };

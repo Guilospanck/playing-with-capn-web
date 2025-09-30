@@ -6,21 +6,21 @@ const notifications = document.getElementById("notifications")!;
 const TOAST_TIMEOUT = 3000;
 
 type ButtonListener<K extends keyof HTMLElementEventMap> = {
-  type: K;
   listener: (
     this: HTMLButtonElement,
     ev: HTMLElementEventMap[K],
-  ) => void | Promise<void>;
+  ) => Promise<void> | void;
+  type: K;
 };
 
 const buttonBuilder = ({
-  title,
-  id,
   eventListener,
+  id,
+  title,
 }: {
-  title: string;
-  id: string;
   eventListener?: ButtonListener<keyof HTMLElementEventMap>;
+  id: string;
+  title: string;
 }): HTMLButtonElement => {
   const button = document.createElement("button");
   button.innerText = title;
@@ -34,13 +34,13 @@ const buttonBuilder = ({
 };
 
 const updateStatus = ({
-  title,
-  color,
   borderColor,
+  color,
+  title,
 }: {
-  title: string;
-  color?: string;
   borderColor?: string;
+  color?: string;
+  title: string;
 }) => {
   status.innerText = title;
   if (color !== undefined) {
@@ -57,13 +57,13 @@ const hideNotification = () => {
 };
 
 const showNotification = ({
-  title,
-  color = "red",
   borderColor = "red",
+  color = "red",
+  title,
 }: {
-  title: string;
-  color?: string;
   borderColor?: string;
+  color?: string;
+  title: string;
 }) => {
   notifications.innerText = title;
   notifications.style.opacity = "100%";
@@ -80,4 +80,4 @@ const showNotification = ({
   }, TOAST_TIMEOUT);
 };
 
-export { showNotification, updateStatus, buttonBuilder, hideNotification };
+export { buttonBuilder, hideNotification, showNotification, updateStatus };

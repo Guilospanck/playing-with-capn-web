@@ -21,30 +21,27 @@ const serverMessages = document.getElementById("serverMessages")!;
 const buildButtons = () => {
   // Connection button
   const connectionButton = buttonBuilder({
-    title: "Connect",
-    id: "connect",
     eventListener: {
-      type: "click",
       listener: async function (this: HTMLButtonElement) {
         await connectWS();
 
         this.disabled = true;
         disconnectButton.disabled = false;
         updateStatus({
-          title: "Connected!",
-          color: "blue",
           borderColor: "blue",
+          color: "blue",
+          title: "Connected!",
         });
       },
+      type: "click",
     },
+    id: "connect",
+    title: "Connect",
   });
 
   // Disconnect button
   const disconnectButton = buttonBuilder({
-    title: "Disconnect",
-    id: "disconnect",
     eventListener: {
-      type: "click",
       listener: async function (this: HTMLButtonElement) {
         closeConnection();
 
@@ -53,65 +50,65 @@ const buildButtons = () => {
         authenticateButton.disabled = false;
         getOrCreateUserButton.disabled = false;
         updateStatus({
-          title: "Disconnected.",
-          color: "red",
           borderColor: "red",
+          color: "red",
+          title: "Disconnected.",
         });
       },
+      type: "click",
     },
+    id: "disconnect",
+    title: "Disconnect",
   });
 
   // Authenticate button
   const authenticateButton = buttonBuilder({
-    title: "Authenticate",
-    id: "authenticate",
     eventListener: {
-      type: "click",
       listener: async function (this: HTMLButtonElement) {
         try {
           await authenticate();
 
           this.disabled = true;
           updateStatus({
-            title: "Connected and authenticated!",
-            color: "green",
             borderColor: "green",
+            color: "green",
+            title: "Connected and authenticated!",
           });
         } catch (err) {
           showNotification({ title: err as unknown as string });
         }
       },
+      type: "click",
     },
+    id: "authenticate",
+    title: "Authenticate",
   });
 
   // Get or create user button
   const getOrCreateUserButton = buttonBuilder({
-    title: "Create user",
-    id: "createUser",
     eventListener: {
-      type: "click",
       listener: async function (this: HTMLButtonElement) {
         try {
           await getOrCreateUser();
           this.disabled = true;
           showNotification({
-            title: "User created!",
-            color: "blue",
             borderColor: "blue",
+            color: "blue",
+            title: "User created!",
           });
         } catch (err) {
           showNotification({ title: err as unknown as string });
         }
       },
+      type: "click",
     },
+    id: "createUser",
+    title: "Create user",
   });
 
   // Get today's date button
   buttonBuilder({
-    title: "Today's Date",
-    id: "todaysDate",
     eventListener: {
-      type: "click",
       listener: async function (this: HTMLButtonElement) {
         try {
           const date = await getTodaysDate();
@@ -120,15 +117,15 @@ const buildButtons = () => {
           showNotification({ title: err as unknown as string });
         }
       },
+      type: "click",
     },
+    id: "todaysDate",
+    title: "Today's Date",
   });
 
   // Get my info button
   buttonBuilder({
-    title: "My info",
-    id: "myInfo",
     eventListener: {
-      type: "click",
       listener: async function (this: HTMLButtonElement) {
         const callback = (serverMsg: unknown) => {
           const li = document.createElement("li");
@@ -155,14 +152,14 @@ const buildButtons = () => {
           showNotification({ title: err as unknown as string });
         }
       },
+      type: "click",
     },
+    id: "myInfo",
+    title: "My info",
   });
 
   buttonBuilder({
-    title: "Authenticate & get my info",
-    id: "authenticateAndGetMyInfo",
     eventListener: {
-      type: "click",
       listener: async function (this: HTMLButtonElement) {
         const callback = (serverMsg: unknown) => {
           const li = document.createElement("li");
@@ -178,16 +175,19 @@ const buildButtons = () => {
           showNotification({ title: err as unknown as string });
         }
       },
+      type: "click",
     },
+    id: "authenticateAndGetMyInfo",
+    title: "Authenticate & get my info",
   });
 };
 
 const setInitialConditions = () => {
   hideNotification();
   updateStatus({
-    title: "Disconnected.",
-    color: "red",
     borderColor: "red",
+    color: "red",
+    title: "Disconnected.",
   });
 
   serverMessages.style.opacity = "0%";
