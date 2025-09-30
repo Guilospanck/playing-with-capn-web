@@ -7,19 +7,20 @@ import {
   getOrCreateUser,
   getTodaysDate,
 } from "@/rpc";
-
-const TOAST_TIMEOUT = 3000;
+import {
+  buttonBuilder,
+  hideNotification,
+  showNotification,
+  updateStatus,
+} from "@/ui/utils";
 
 // These always exist because they are hardcoded in the HTML
 const content = document.getElementById("content")!;
-const status = document.getElementById("status")!;
-const buttons = document.getElementById("buttons")!;
-const notifications = document.getElementById("notifications")!;
 const serverMessages = document.getElementById("serverMessages")!;
 
 const buildButtons = () => {
   // Connection button
-  const connectionButton = _buildButton({
+  const connectionButton = buttonBuilder({
     title: "Connect",
     id: "connect",
     eventListener: {
@@ -29,7 +30,7 @@ const buildButtons = () => {
 
         this.disabled = true;
         disconnectButton.disabled = false;
-        _updateStatus({
+        updateStatus({
           title: "Connected!",
           color: "blue",
           borderColor: "blue",
@@ -39,7 +40,7 @@ const buildButtons = () => {
   });
 
   // Disconnect button
-  const disconnectButton = _buildButton({
+  const disconnectButton = buttonBuilder({
     title: "Disconnect",
     id: "disconnect",
     eventListener: {
@@ -51,7 +52,7 @@ const buildButtons = () => {
         connectionButton.disabled = false;
         authenticateButton.disabled = false;
         getOrCreateUserButton.disabled = false;
-        _updateStatus({
+        updateStatus({
           title: "Disconnected.",
           color: "red",
           borderColor: "red",
@@ -61,7 +62,7 @@ const buildButtons = () => {
   });
 
   // Authenticate button
-  const authenticateButton = _buildButton({
+  const authenticateButton = buttonBuilder({
     title: "Authenticate",
     id: "authenticate",
     eventListener: {
@@ -71,20 +72,20 @@ const buildButtons = () => {
           await authenticate();
 
           this.disabled = true;
-          _updateStatus({
+          updateStatus({
             title: "Connected and authenticated!",
             color: "green",
             borderColor: "green",
           });
         } catch (err) {
-          _showNotification({ title: err as unknown as string });
+          showNotification({ title: err as unknown as string });
         }
       },
     },
   });
 
   // Get or create user button
-  const getOrCreateUserButton = _buildButton({
+  const getOrCreateUserButton = buttonBuilder({
     title: "Create user",
     id: "createUser",
     eventListener: {
@@ -93,20 +94,20 @@ const buildButtons = () => {
         try {
           await getOrCreateUser();
           this.disabled = true;
-          _showNotification({
+          showNotification({
             title: "User created!",
             color: "blue",
             borderColor: "blue",
           });
         } catch (err) {
-          _showNotification({ title: err as unknown as string });
+          showNotification({ title: err as unknown as string });
         }
       },
     },
   });
 
   // Get today's date button
-  _buildButton({
+  buttonBuilder({
     title: "Today's Date",
     id: "todaysDate",
     eventListener: {
@@ -116,14 +117,14 @@ const buildButtons = () => {
           const date = await getTodaysDate();
           content.innerText = date;
         } catch (err) {
-          _showNotification({ title: err as unknown as string });
+          showNotification({ title: err as unknown as string });
         }
       },
     },
   });
 
   // Get my info button
-  _buildButton({
+  buttonBuilder({
     title: "My info",
     id: "myInfo",
     eventListener: {
@@ -151,13 +152,13 @@ const buildButtons = () => {
           const myInfo = await getMyInfo(callback);
           content.innerText = JSON.stringify(myInfo);
         } catch (err) {
-          _showNotification({ title: err as unknown as string });
+          showNotification({ title: err as unknown as string });
         }
       },
     },
   });
 
-  _buildButton({
+  buttonBuilder({
     title: "Authenticate & get my info",
     id: "authenticateAndGetMyInfo",
     eventListener: {
@@ -174,67 +175,16 @@ const buildButtons = () => {
           const myInfo = await authenticateAndGetMyInfo(callback);
           content.innerText = JSON.stringify(myInfo);
         } catch (err) {
-          _showNotification({ title: err as unknown as string });
+          showNotification({ title: err as unknown as string });
         }
       },
     },
   });
 };
 
-const buildUI = () => {
-  buildButtons();
-  _setInitialConditions();
-};
-
-type ButtonListener<K extends keyof HTMLElementEventMap> = {
-  type: K;
-  listener: (
-    this: HTMLButtonElement,
-    ev: HTMLElementEventMap[K],
-  ) => void | Promise<void>;
-};
-
-const _buildButton = ({
-  title,
-  id,
-  eventListener,
-}: {
-  title: string;
-  id: string;
-  eventListener?: ButtonListener<keyof HTMLElementEventMap>;
-}): HTMLButtonElement => {
-  const button = document.createElement("button");
-  button.innerText = title;
-  button.id = id;
-  if (eventListener) {
-    button.addEventListener(eventListener.type, eventListener.listener);
-  }
-  buttons.appendChild(button);
-
-  return button;
-};
-
-const _updateStatus = ({
-  title,
-  color,
-  borderColor,
-}: {
-  title: string;
-  color?: string;
-  borderColor?: string;
-}) => {
-  status.innerText = title;
-  if (color !== undefined) {
-    status.style.color = color;
-  }
-  if (borderColor !== undefined) {
-    status.style.borderColor = borderColor;
-  }
-};
-
-const _setInitialConditions = () => {
-  _hideNotification();
-  _updateStatus({
+const setInitialConditions = () => {
+  hideNotification();
+  updateStatus({
     title: "Disconnected.",
     color: "red",
     borderColor: "red",
@@ -247,33 +197,8 @@ const _setInitialConditions = () => {
   }
 };
 
-const _hideNotification = () => {
-  notifications.style.opacity = "0%";
-  notifications.innerText = "";
+const buildUI = () => {
+  buildButtons();
+  setInitialConditions();
 };
-
-const _showNotification = ({
-  title,
-  color = "red",
-  borderColor = "red",
-}: {
-  title: string;
-  color?: string;
-  borderColor?: string;
-}) => {
-  notifications.innerText = title;
-  notifications.style.opacity = "100%";
-
-  if (color !== undefined) {
-    notifications.style.color = color;
-  }
-  if (borderColor !== undefined) {
-    notifications.style.borderColor = borderColor;
-  }
-
-  setTimeout(() => {
-    _hideNotification();
-  }, TOAST_TIMEOUT);
-};
-
 export { buildUI };
