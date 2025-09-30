@@ -137,17 +137,17 @@ const buildButtons = () => {
         };
 
         try {
-          /*
-           * Bidirectional calling.
-           *
-           * From the docs:
-           *
-           * 'Supports passing functions by reference: If you pass a function over RPC, the recipient receives a "stub".
-           * When they call the stub, they actually make an RPC back to you, invoking the function where it was created.
-           * This is how bidirectional calling happens: the client passes a callback to the server,
-           * and then the server can call it later.'
-           *
-           * */
+          // Bidirectional calling.
+          //
+          // From the docs:
+          //
+          // 'Supports passing functions by reference: If you pass a function over RPC,
+          // the recipient receives a "stub". When they call the stub,
+          // they actually make an RPC back to you, invoking the function where it was created.
+          // This is how bidirectional calling happens:
+          // the client passes a callback to the server,
+          // and then the server can call it later.'
+          //
           const myInfo = await getMyInfo(callback);
           content.innerText = JSON.stringify(myInfo);
         } catch (err) {

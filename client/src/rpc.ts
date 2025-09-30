@@ -60,6 +60,13 @@ const getMyInfo = async (
 // Example of the "promise pipelining":
 // we can `authenticate` and call the `getMyInfo`
 // in just one call to the server.
+//
+// From the docs;
+//
+// "When you start an RPC, you get back a promise. Instead of awaiting it,
+// you can immediately use the promise in dependent RPCs,
+// thus performing a chain of calls in a single network round trip."
+//
 const authenticateAndGetMyInfo = async (
   cb: (serverMsg: unknown) => void,
 ): Promise<UserInfo> => {
