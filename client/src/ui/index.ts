@@ -17,6 +17,11 @@ import {
 // These always exist because they are hardcoded in the HTML
 const content = document.getElementById("content")!;
 const serverMessages = document.getElementById("serverMessages")!;
+const nameInput = document.getElementById("name")! as HTMLInputElement;
+const emailInput = document.getElementById("email")! as HTMLInputElement;
+const createUserButton = document.getElementById(
+  "createUserBtn",
+)! as HTMLButtonElement;
 
 const buildButtons = () => {
   // Connection button
@@ -48,7 +53,7 @@ const buildButtons = () => {
         this.disabled = true;
         connectionButton.disabled = false;
         authenticateButton.disabled = false;
-        getOrCreateUserButton.disabled = false;
+        createUserButton.disabled = false;
         updateStatus({
           borderColor: "red",
           color: "red",
@@ -84,27 +89,35 @@ const buildButtons = () => {
     title: "Authenticate",
   });
 
-  // Get or create user button
-  const getOrCreateUserButton = buttonBuilder({
-    eventListener: {
-      listener: async function (this: HTMLButtonElement) {
-        try {
-          await getOrCreateUser();
-          this.disabled = true;
+  // Create user button
+  // (No need to build it, already in the HTML)
+  createUserButton.addEventListener(
+    "click",
+    async function (this: HTMLButtonElement) {
+      try {
+        const name = nameInput.value;
+        const email = emailInput.value;
+        if (name.length === 0 || email.length === 0) {
           showNotification({
-            borderColor: "blue",
-            color: "blue",
-            title: "User created!",
+            borderColor: "red",
+            color: "red",
+            title: "Please input email and email",
           });
-        } catch (err) {
-          showNotification({ title: err as unknown as string });
+          return;
         }
-      },
-      type: "click",
+
+        await getOrCreateUser(name, email);
+        this.disabled = true;
+        showNotification({
+          borderColor: "blue",
+          color: "blue",
+          title: "User created!",
+        });
+      } catch (err) {
+        showNotification({ title: err as unknown as string });
+      }
     },
-    id: "createUser",
-    title: "Create user",
-  });
+  );
 
   // Get today's date button
   buttonBuilder({

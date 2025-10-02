@@ -31,13 +31,13 @@ const authenticate = async (): Promise<void> => {
   });
 };
 
-const getOrCreateUser = async (): Promise<UserInfo> => {
+const getOrCreateUser = async (
+  name: string,
+  email: string,
+): Promise<UserInfo> => {
   if (!publicAPI) throw new Error(NO_CONNECTION);
 
-  const user: RpcStub<UserInfo> = await publicAPI.getOrCreateUser(
-    "Guilherme",
-    "guilherme@email.com",
-  );
+  const user: RpcStub<UserInfo> = await publicAPI.getOrCreateUser(name, email);
   localStorage.setItem("token", user.token);
 
   return user;

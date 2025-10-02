@@ -51,6 +51,18 @@
         overflow: scroll;
       }
     }
+    #newUser {
+      display: flex;
+      flex-direction: column;
+      padding: 2px;
+      align-items: center;
+      gap: 8px;
+    }
+    .input {
+      padding: 2px;
+      border-radius: 5px;
+      width: 300px;
+    }
   </style>
   <body>
     <div id="buttons"></div>
@@ -59,6 +71,11 @@
     <div id="notifications"></div>
     <div id="serverMessages">
       <ul></ul>
+    </div>
+    <div id="newUser">
+      <input id="name" class="input" type="text" placeholder="Name" />
+      <input id="email" class="input" type="email" placeholder="Email" />
+      <button id="createUserBtn">Create User</button>
     </div>
     <script type="module" src="dist/index.js"></script>
   </body>
