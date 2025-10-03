@@ -14,6 +14,7 @@ export interface AuthenticatedAPI {
 
 export interface PublicAPI {
   authenticate(token: string): AuthenticatedAPI;
+  login(email: string): UserInfo;
   getOrCreateUser(name: string, email: string): UserInfo;
   getTodaysDate(): string;
 }
@@ -42,6 +43,21 @@ export class PublicAPIImpl extends RpcTarget implements PublicAPI {
 
     return new AuthenticatedAPIImpl(user);
   }
+
+  login(email: string): UserInfo {
+    // Check if user exists
+    const user = db
+      .query(`SELECT * FROM User WHERE email = $email;`)
+      .as(User)
+      .get({ email });
+
+    if (user === null) {
+      throw new Error("User not found with this token.");
+    }
+
+    return user;
+  }
+
   getOrCreateUser(name: string, email: string): UserInfo {
     // Check if user exists
     const user = db

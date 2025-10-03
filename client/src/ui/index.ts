@@ -17,13 +17,25 @@ import {
 // These always exist because they are hardcoded in the HTML
 const content = document.getElementById("content")!;
 const serverMessages = document.getElementById("serverMessages")!;
+
+// Create new user
+const newUserContainer = document.getElementById("newUser")!;
 const nameInput = document.getElementById("name")! as HTMLInputElement;
 const emailInput = document.getElementById("email")! as HTMLInputElement;
-const createUserButton = document.getElementById(
-  "createUserBtn",
+const submitCreateNewUserBtn = document.getElementById(
+  "submitCreateUserBtn",
 )! as HTMLButtonElement;
 
-const buildButtons = () => {
+// Login
+const loginContainer = document.getElementById("login")!;
+const emailLoginInput = document.getElementById(
+  "emailLogin",
+)! as HTMLInputElement;
+const submitLoginBtn = document.getElementById(
+  "submitLoginBtn",
+)! as HTMLButtonElement;
+
+const createNewButtons = () => {
   // Connection button
   const connectionButton = buttonBuilder({
     eventListener: {
@@ -53,7 +65,7 @@ const buildButtons = () => {
         this.disabled = true;
         connectionButton.disabled = false;
         authenticateButton.disabled = false;
-        createUserButton.disabled = false;
+        submitCreateNewUserBtn.disabled = false;
         updateStatus({
           borderColor: "red",
           color: "red",
@@ -88,36 +100,6 @@ const buildButtons = () => {
     id: "authenticate",
     title: "Authenticate",
   });
-
-  // Create user button
-  // (No need to build it, already in the HTML)
-  createUserButton.addEventListener(
-    "click",
-    async function (this: HTMLButtonElement) {
-      try {
-        const name = nameInput.value;
-        const email = emailInput.value;
-        if (name.length === 0 || email.length === 0) {
-          showNotification({
-            borderColor: "red",
-            color: "red",
-            title: "Please input email and email",
-          });
-          return;
-        }
-
-        await getOrCreateUser(name, email);
-        this.disabled = true;
-        showNotification({
-          borderColor: "blue",
-          color: "blue",
-          title: "User created!",
-        });
-      } catch (err) {
-        showNotification({ title: err as unknown as string });
-      }
-    },
-  );
 
   // Get today's date button
   buttonBuilder({
@@ -195,6 +177,62 @@ const buildButtons = () => {
   });
 };
 
+// Buttons already in the HTML
+const addListenerToExistingButtons = () => {
+  // Submit create new user button
+  submitCreateNewUserBtn.addEventListener(
+    "click",
+    async function (this: HTMLButtonElement) {
+      try {
+        const name = nameInput.value;
+        const email = emailInput.value;
+        if (name.length === 0 || email.length === 0) {
+          showNotification({
+            borderColor: "red",
+            color: "red",
+            title: "Please input email and email",
+          });
+          return;
+        }
+
+        await getOrCreateUser(name, email);
+        this.disabled = true;
+        showNotification({
+          borderColor: "blue",
+          color: "blue",
+          title: "User created!",
+        });
+      } catch (err) {
+        showNotification({ title: err as unknown as string });
+      }
+    },
+  );
+
+  // Submit login user button
+  submitLoginBtn.addEventListener(
+    "click",
+    async function (this: HTMLButtonElement) {
+      try {
+        await authenticate();
+
+        this.disabled = true;
+        updateStatus({
+          borderColor: "green",
+          color: "green",
+          title: "Connected and authenticated!",
+        });
+      } catch (err) {
+        showNotification({ title: err as unknown as string });
+      }
+    },
+  );
+};
+
+const buildButtons = () => {
+  createNewButtons();
+  addListenerToExistingButtons();
+};
+
 const setInitialConditions = () => {
   hideNotification();
   updateStatus({
@@ -208,6 +246,8 @@ const setInitialConditions = () => {
   if (disconnectButton) {
     (disconnectButton as HTMLButtonElement).disabled = true;
   }
+
+  newUserContainer.style.display = "none";
 };
 
 const buildUI = () => {

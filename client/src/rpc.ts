@@ -43,6 +43,20 @@ const getOrCreateUser = async (
   return user;
 };
 
+// TODO: use
+const loginUser = async (email: string): Promise<UserInfo> => {
+  if (!publicAPI) throw new Error(NO_CONNECTION);
+
+  const user: RpcStub<UserInfo> = publicAPI.login(email);
+  localStorage.setItem("token", user.token);
+
+  // TODO: check why this is happening
+  // @ts-expect-error Not sure why TS is saying: Property 'map' is missing in type.
+  authenticatedAPI = await publicAPI.authenticate(user.token);
+
+  return user;
+};
+
 const getMyInfo = async (
   cb: (serverMsg: unknown) => void,
 ): Promise<UserInfo> => {
