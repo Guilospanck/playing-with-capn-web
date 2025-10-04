@@ -17,16 +17,21 @@ const buttonBuilder = ({
   eventListener,
   id,
   title,
+  style,
 }: {
   eventListener?: ButtonListener<keyof HTMLElementEventMap>;
   id: string;
   title: string;
+  style?: Partial<CSSStyleDeclaration>;
 }): HTMLButtonElement => {
   const button = document.createElement("button");
   button.innerText = title;
   button.id = id;
   if (eventListener) {
     button.addEventListener(eventListener.type, eventListener.listener);
+  }
+  if (style) {
+    Object.assign(button.style, style);
   }
   buttons.appendChild(button);
 
@@ -80,4 +85,31 @@ const showNotification = ({
   }, TOAST_TIMEOUT);
 };
 
-export { buttonBuilder, hideNotification, showNotification, updateStatus };
+const enableAndDisplayButtonBasedOnId = (ids: string[]) => {
+  for (const id of ids) {
+    const button = document.getElementById(id) as HTMLButtonElement | null;
+    if (button) {
+      button.disabled = false;
+      button.style.display = "flex";
+    }
+  }
+};
+
+const disableAndHideButtonBasedOnId = (ids: string[]) => {
+  for (const id of ids) {
+    const button = document.getElementById(id) as HTMLButtonElement | null;
+    if (button) {
+      button.disabled = true;
+      button.style.display = "none";
+    }
+  }
+};
+
+export {
+  buttonBuilder,
+  hideNotification,
+  showNotification,
+  updateStatus,
+  enableAndDisplayButtonBasedOnId,
+  disableAndHideButtonBasedOnId,
+};

@@ -1,3 +1,9 @@
+# Start both client and server.
+dev_local:
+  cd server/ && bun dev &
+  cd ..
+  cd client/ && bun run build && npx http-server -p 3000 .
+
 # Start WS server that on connection starts a RPC
 start_server:
   cd server/ && bun dev
@@ -32,3 +38,6 @@ pre-pr: typecheck lint-fix
 # Log into DB via sqlite3 CLI
 db:
   bash -c 'source ./scripts/run.dev.sh && log_into_db_with_sqlite3_cli'
+
+kill-capn:
+  pids=$(pgrep -f capn-web) && [ -n "$pids" ] && kill -9 $pids

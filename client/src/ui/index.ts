@@ -9,6 +9,8 @@ import {
 } from "@/rpc";
 import {
   buttonBuilder,
+  disableAndHideButtonBasedOnId,
+  enableAndDisplayButtonBasedOnId,
   hideNotification,
   showNotification,
   updateStatus,
@@ -35,20 +37,77 @@ const submitLoginBtn = document.getElementById(
   "submitLoginBtn",
 )! as HTMLButtonElement;
 
+const onConnectSuccess = () => {
+  const connectBtn = document.getElementById("connect")! as HTMLButtonElement;
+  connectBtn.disabled = true;
+  connectBtn.style.display = "none";
+
+  const buttonIdsToBeDisplayed = [
+    "disconnect",
+    "authenticate",
+    "todaysDate",
+    "authenticateAndGetMyInfo",
+  ];
+  enableAndDisplayButtonBasedOnId(buttonIdsToBeDisplayed);
+
+  updateStatus({
+    borderColor: "blue",
+    color: "blue",
+    title: "Connected!",
+  });
+};
+
+const onAuthenticateSuccess = () => {
+  const authenticateBtn = document.getElementById(
+    "authenticate",
+  )! as HTMLButtonElement;
+  authenticateBtn.disabled = true;
+  authenticateBtn.style.display = "none";
+
+  const buttonIdsToBeDisplayed = ["myInfo"];
+  enableAndDisplayButtonBasedOnId(buttonIdsToBeDisplayed);
+
+  updateStatus({
+    borderColor: "green",
+    color: "green",
+    title: "Connected and authenticated!",
+  });
+};
+
+const onDisconnectSuccess = () => {
+  const disconnectBtn = document.getElementById(
+    "disconnect",
+  )! as HTMLButtonElement;
+  disconnectBtn.disabled = true;
+  disconnectBtn.style.display = "none";
+
+  const buttonIdsToBeDisplayed = ["connect"];
+  enableAndDisplayButtonBasedOnId(buttonIdsToBeDisplayed);
+
+  const buttonIdsToBeHidden = [
+    "disconnect",
+    "authenticate",
+    "todaysDate",
+    "authenticateAndGetMyInfo",
+    "myInfo",
+    "submitCreateUserBtn",
+  ];
+  disableAndHideButtonBasedOnId(buttonIdsToBeHidden);
+
+  updateStatus({
+    borderColor: "red",
+    color: "red",
+    title: "Disconnected.",
+  });
+};
+
 const createNewButtons = () => {
   // Connection button
   const connectionButton = buttonBuilder({
     eventListener: {
       listener: async function (this: HTMLButtonElement) {
         await connectWS();
-
-        this.disabled = true;
-        disconnectButton.disabled = false;
-        updateStatus({
-          borderColor: "blue",
-          color: "blue",
-          title: "Connected!",
-        });
+        onConnectSuccess();
       },
       type: "click",
     },
@@ -57,25 +116,17 @@ const createNewButtons = () => {
   });
 
   // Disconnect button
-  const disconnectButton = buttonBuilder({
+  buttonBuilder({
     eventListener: {
       listener: async function (this: HTMLButtonElement) {
         closeConnection();
-
-        this.disabled = true;
-        connectionButton.disabled = false;
-        authenticateButton.disabled = false;
-        submitCreateNewUserBtn.disabled = false;
-        updateStatus({
-          borderColor: "red",
-          color: "red",
-          title: "Disconnected.",
-        });
+        onDisconnectSuccess();
       },
       type: "click",
     },
     id: "disconnect",
     title: "Disconnect",
+    style: { display: "none" },
   });
 
   // Authenticate button
@@ -84,13 +135,7 @@ const createNewButtons = () => {
       listener: async function (this: HTMLButtonElement) {
         try {
           await authenticate();
-
-          this.disabled = true;
-          updateStatus({
-            borderColor: "green",
-            color: "green",
-            title: "Connected and authenticated!",
-          });
+          onAuthenticateSuccess();
         } catch (err) {
           showNotification({ title: err as unknown as string });
         }
@@ -99,6 +144,7 @@ const createNewButtons = () => {
     },
     id: "authenticate",
     title: "Authenticate",
+    style: { display: "none" },
   });
 
   // Get today's date button
@@ -116,6 +162,7 @@ const createNewButtons = () => {
     },
     id: "todaysDate",
     title: "Today's Date",
+    style: { display: "none" },
   });
 
   // Get my info button
@@ -151,6 +198,7 @@ const createNewButtons = () => {
     },
     id: "myInfo",
     title: "My info",
+    style: { display: "none" },
   });
 
   buttonBuilder({
@@ -174,6 +222,7 @@ const createNewButtons = () => {
     },
     id: "authenticateAndGetMyInfo",
     title: "Authenticate & get my info",
+    style: { display: "none" },
   });
 };
 
