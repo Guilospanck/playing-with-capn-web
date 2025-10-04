@@ -7,7 +7,7 @@ const NO_CONNECTION = "No connection to WS";
 let publicAPI: RpcStub<PublicAPI> | undefined = undefined;
 let authenticatedAPI: RpcStub<AuthenticatedAPI> | undefined = undefined;
 
-const connectWS = async () => {
+const connectWS = () => {
   publicAPI = newWebSocketRpcSession<PublicAPI>("ws://localhost:4444/rpc");
 };
 
@@ -15,20 +15,6 @@ const getTodaysDate = async (): Promise<string> => {
   if (!publicAPI) throw new Error(NO_CONNECTION);
 
   return await publicAPI.getTodaysDate();
-};
-
-const authenticate = async (): Promise<void> => {
-  if (!publicAPI) throw new Error(NO_CONNECTION);
-
-  const token = localStorage.getItem("token") ?? "";
-
-  // TODO: check why this is happening
-  // @ts-expect-error Not sure why TS is saying: "Type instantiation is excessively deep and possibly infinite."
-  authenticatedAPI = await publicAPI.authenticate(token);
-
-  authenticatedAPI?.onRpcBroken((error: unknown) => {
-    console.error("Authentication unsuccessful: ", error);
-  });
 };
 
 const getOrCreateUser = async (
@@ -43,16 +29,21 @@ const getOrCreateUser = async (
   return user;
 };
 
-// TODO: use
 const loginUser = async (email: string): Promise<UserInfo> => {
   if (!publicAPI) throw new Error(NO_CONNECTION);
+  console.debug("Logging with email: ", email);
 
-  const user: RpcStub<UserInfo> = publicAPI.login(email);
-  localStorage.setItem("token", user.token);
+  const user: UserInfo = await publicAPI.login(email);
 
   // TODO: check why this is happening
   // @ts-expect-error Not sure why TS is saying: Property 'map' is missing in type.
   authenticatedAPI = await publicAPI.authenticate(user.token);
+
+  authenticatedAPI?.onRpcBroken((error: unknown) => {
+    console.error("Authentication unsuccessful: ", error);
+  });
+
+  localStorage.setItem("token", user.token);
 
   return user;
 };
@@ -110,11 +101,11 @@ const closeConnection = () => {
 };
 
 export {
-  authenticate,
   authenticateAndGetMyInfo,
   closeConnection,
   connectWS,
   getMyInfo,
   getOrCreateUser,
   getTodaysDate,
+  loginUser,
 };

@@ -55,7 +55,7 @@ export class PublicAPIImpl extends RpcTarget implements PublicAPI {
       throw new Error("User not found with this token.");
     }
 
-    return user;
+    return user.toJSON();
   }
 
   getOrCreateUser(name: string, email: string): UserInfo {
@@ -88,6 +88,7 @@ export class PublicAPIImpl extends RpcTarget implements PublicAPI {
 
     return createdUser!.toJSON(); // Returned user can't be null. We just created it
   }
+
   getTodaysDate(): string {
     return new Date().toISOString();
   }

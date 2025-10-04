@@ -1,11 +1,11 @@
 import {
-  authenticate,
   authenticateAndGetMyInfo,
   closeConnection,
   connectWS,
   getMyInfo,
   getOrCreateUser,
   getTodaysDate,
+  loginUser,
 } from "@/rpc";
 import {
   buttonBuilder,
@@ -44,7 +44,6 @@ const onConnectSuccess = () => {
 
   const buttonIdsToBeDisplayed = [
     "disconnect",
-    "authenticate",
     "todaysDate",
     "authenticateAndGetMyInfo",
   ];
@@ -55,15 +54,12 @@ const onConnectSuccess = () => {
     color: "blue",
     title: "Connected!",
   });
+
+  newUserContainer.style.display = "flex";
+  loginContainer.style.display = "flex";
 };
 
-const onAuthenticateSuccess = () => {
-  const authenticateBtn = document.getElementById(
-    "authenticate",
-  )! as HTMLButtonElement;
-  authenticateBtn.disabled = true;
-  authenticateBtn.style.display = "none";
-
+const onLoginSuccess = () => {
   const buttonIdsToBeDisplayed = ["myInfo"];
   enableAndDisplayButtonBasedOnId(buttonIdsToBeDisplayed);
 
@@ -72,6 +68,8 @@ const onAuthenticateSuccess = () => {
     color: "green",
     title: "Connected and authenticated!",
   });
+
+  loginContainer.style.display = "none";
 };
 
 const onDisconnectSuccess = () => {
@@ -86,7 +84,6 @@ const onDisconnectSuccess = () => {
 
   const buttonIdsToBeHidden = [
     "disconnect",
-    "authenticate",
     "todaysDate",
     "authenticateAndGetMyInfo",
     "myInfo",
@@ -99,14 +96,17 @@ const onDisconnectSuccess = () => {
     color: "red",
     title: "Disconnected.",
   });
+
+  newUserContainer.style.display = "none";
+  loginContainer.style.display = "none";
 };
 
 const createNewButtons = () => {
   // Connection button
-  const connectionButton = buttonBuilder({
+  buttonBuilder({
     eventListener: {
-      listener: async function (this: HTMLButtonElement) {
-        await connectWS();
+      listener: () => {
+        connectWS();
         onConnectSuccess();
       },
       type: "click",
@@ -118,7 +118,7 @@ const createNewButtons = () => {
   // Disconnect button
   buttonBuilder({
     eventListener: {
-      listener: async function (this: HTMLButtonElement) {
+      listener: () => {
         closeConnection();
         onDisconnectSuccess();
       },
@@ -129,28 +129,10 @@ const createNewButtons = () => {
     style: { display: "none" },
   });
 
-  // Authenticate button
-  const authenticateButton = buttonBuilder({
-    eventListener: {
-      listener: async function (this: HTMLButtonElement) {
-        try {
-          await authenticate();
-          onAuthenticateSuccess();
-        } catch (err) {
-          showNotification({ title: err as unknown as string });
-        }
-      },
-      type: "click",
-    },
-    id: "authenticate",
-    title: "Authenticate",
-    style: { display: "none" },
-  });
-
   // Get today's date button
   buttonBuilder({
     eventListener: {
-      listener: async function (this: HTMLButtonElement) {
+      listener: async () => {
         try {
           const date = await getTodaysDate();
           content.innerText = date;
@@ -262,7 +244,10 @@ const addListenerToExistingButtons = () => {
     "click",
     async function (this: HTMLButtonElement) {
       try {
-        await authenticate();
+        const email = emailLoginInput.value;
+        await loginUser(email);
+
+        onLoginSuccess();
 
         this.disabled = true;
         updateStatus({
@@ -297,6 +282,7 @@ const setInitialConditions = () => {
   }
 
   newUserContainer.style.display = "none";
+  loginContainer.style.display = "none";
 };
 
 const buildUI = () => {
